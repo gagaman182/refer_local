@@ -774,8 +774,9 @@
 		$("#planame_edit_fu").val(row.placename);
 
 		showptdetail(row.id,row.cid,row.referout_no);
-		showptservice(row.referout_no);
-	
+		//showptservice(row.referout_no); // Thai Refer - พักไว้ก่อน
+		moph_refer(row.referout_no); // ใช้ MOPH Refer เป็นหลัก
+
 		$('#modal-addpt').modal({backdrop: 'static', keyboard: false}) ;
 
 	});
@@ -824,7 +825,7 @@
 		}else{
 			getlookup();
 			//console.log(row.id+' '+row.cid+' '+row.referout_no)
-			
+
 			$("#nav-home-tab").addClass('active');
 			$("#nav-home").addClass('show active');
 
@@ -834,7 +835,8 @@
 			$("#referout_no").val(row.referout_no);
 
 			showptdetail(row.id,row.cid,referout_no);
-			showptservice(row.referout_no);
+			//showptservice(row.referout_no); // Thai Refer - พักไว้ก่อน
+			moph_refer(row.referout_no); // ใช้ MOPH Refer เป็นหลัก
 			//var pttype=nhso_check(row.cid);
 			//$("#pttype").val(pttype.inscl);
 			//$("#cardid").val(pttype.cardid);
@@ -1232,11 +1234,17 @@
 
 	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 		if(e.target.id=='nav-moph-refer-tab'){
+			// เรียก moph_refer เมื่อคลิกที่ tab
+			var referout_no = $("#referout_no").val();
+			if(referout_no){
+				moph_refer(referout_no);
+			}
+
 			if($("#refer-file-url").text()==""){
 				$("#btn_moph-refer").prop('hidden',true);
 			}else{
 				$("#btn_moph-refer").prop('hidden',false);
-				window.open($("#refer-file-url").text(), '_blank');			
+				window.open($("#refer-file-url").text(), '_blank');
 			}
 		}
 	});
@@ -1556,6 +1564,15 @@
 					$("#referoutdate").val(data.data.refer_data.refer_date);
 					$("#hcode").val(data.data.refer_data.hospital_origin_name);
 					$("#refer-file-url").text(data.data.refer_data.refer_file_url);
+
+					// โหลด PDF เข้า iframe
+					if(data.data.refer_data.refer_file_url){
+						$("#moph-refer-content").hide();
+						$("#moph-refer-iframe").attr("src", data.data.refer_data.refer_file_url).show();
+					}else{
+						$("#moph-refer-iframe").hide();
+						$("#moph-refer-content").html('<p class="text-danger">ไม่พบไฟล์ใบ Refer</p>').show();
+					}
 				}
 			});
 	}

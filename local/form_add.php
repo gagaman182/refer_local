@@ -398,7 +398,21 @@
 							<div class="tab-pane fade mb-3" id="nav-moph-refer" role="tabpanel" aria-labelledby="nav-moph-refer-tab">
 								<br>
 								<p id="refer-file-url" hidden></p>
-								<button type="button" id="btn_moph-refer" class="btn btn-primary">เปิดใบ Refer</button>
+								<div class="row">
+									<div class="col-md-12">
+										<div class="panel panel-primary">
+											<div class="panel-heading">
+												<h3 class="panel-title">ใบ Refer (MOPH Refer)</h3>
+											</div>
+											<div class="panel-body p-1">
+												<div id="moph-refer-content" style="text-align: center; padding: 20px;">
+													<p class="text-muted">กรุณาเลือกรายชื่อผู้ป่วยเพื่อแสดงใบ Refer</p>
+												</div>
+												<iframe id="moph-refer-iframe" style="width: 100%; height: 800px; border: 1px solid #ddd; display: none;"></iframe>
+											</div>
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
