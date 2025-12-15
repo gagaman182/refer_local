@@ -1239,13 +1239,6 @@
 			if(referout_no){
 				moph_refer(referout_no);
 			}
-
-			if($("#refer-file-url").text()==""){
-				$("#btn_moph-refer").prop('hidden',true);
-			}else{
-				$("#btn_moph-refer").prop('hidden',false);
-				window.open($("#refer-file-url").text(), '_blank');
-			}
 		}
 	});
 
@@ -1565,13 +1558,13 @@
 					$("#hcode").val(data.data.refer_data.hospital_origin_name);
 					$("#refer-file-url").text(data.data.refer_data.refer_file_url);
 
-					// โหลด PDF เข้า iframe
+					// แสดงปุ่มเปิดใบ Refer
 					if(data.data.refer_data.refer_file_url){
 						$("#moph-refer-content").hide();
-						$("#moph-refer-iframe").attr("src", data.data.refer_data.refer_file_url).show();
+						$("#moph-refer-button").show();
 					}else{
-						$("#moph-refer-iframe").hide();
-						$("#moph-refer-content").html('<p class="text-danger">ไม่พบไฟล์ใบ Refer</p>').show();
+						$("#moph-refer-button").hide();
+						$("#moph-refer-content").html('<i class="fas fa-exclamation-triangle fa-5x text-danger mb-3"></i><p class="text-danger">ไม่พบไฟล์ใบ Refer</p>').show();
 					}
 				}
 			});

@@ -404,11 +404,21 @@
 											<div class="panel-heading">
 												<h3 class="panel-title">ใบ Refer (MOPH Refer)</h3>
 											</div>
-											<div class="panel-body p-1">
-												<div id="moph-refer-content" style="text-align: center; padding: 20px;">
+											<div class="panel-body p-3 text-center">
+												<div id="moph-refer-content">
+													<i class="fas fa-file-pdf fa-5x text-muted mb-3"></i>
 													<p class="text-muted">กรุณาเลือกรายชื่อผู้ป่วยเพื่อแสดงใบ Refer</p>
 												</div>
-												<iframe id="moph-refer-iframe" style="width: 100%; height: 800px; border: 1px solid #ddd; display: none;"></iframe>
+												<div id="moph-refer-button" style="display: none;">
+													<i class="fas fa-file-pdf fa-5x text-primary mb-3"></i>
+													<p class="mb-3">ใบ Refer พร้อมแล้ว</p>
+													<button type="button" id="btn_moph-refer" class="btn btn-primary btn-lg">
+														<i class="fas fa-external-link-alt"></i> เปิดใบ Refer
+													</button>
+													<p class="text-muted mt-2 small">
+														<i class="fas fa-info-circle"></i> ระบบจะเปิดใบ Refer ในหน้าต่างใหม่
+													</p>
+												</div>
 											</div>
 										</div>
 									</div>
