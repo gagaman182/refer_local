@@ -660,13 +660,13 @@
 
 	$("#tbl_ptapp").on('load-success.bs.table', function (data) {
 		//auto_pushtext();
-		console.log('รายชื่อผู้ป่วยนัด refresh');
-		console.log($("#tbl_ptapp").bootstrapTable('getOptions').totalRows);
-		if($("#app_status").is(":checked")){
-			if($("#tbl_ptapp").bootstrapTable('getOptions').totalRows>0){
-				$.notify('มีผู้ป่วย Refer รอลงนัดใน PMK จำนวน '+$("#tbl_ptapp").bootstrapTable('getOptions').totalRows + ' ราย','info');
-			}
-		}
+		//console.log('รายชื่อผู้ป่วยนัด refresh');
+		// console.log($("#tbl_ptapp").bootstrapTable('getOptions').totalRows);
+		// if($("#app_status").is(":checked")){
+		// 	if($("#tbl_ptapp").bootstrapTable('getOptions').totalRows>0){
+		// 		$.notify('มีผู้ป่วย Refer รอลงนัดใน PMK จำนวน '+$("#tbl_ptapp").bootstrapTable('getOptions').totalRows + ' ราย','info');
+		// 	}
+		// }
 		//console.log(data);
 	});
 
@@ -1140,7 +1140,7 @@
 								//return false;
 							},
 							success:function(data){
-								console.log(data);
+								//console.log(data);
 							}
 						});
 
@@ -1173,7 +1173,7 @@
 								return false;
 							},
 							success:function(data){
-								console.log(data);
+								//console.log(data);
 							}
 						});
 					});
@@ -1188,7 +1188,7 @@
 	});
 
 	$("#tbl_holiday_doctor").on('click-row.bs.table', function (e, row, $element,col) {
-		console.log(row);
+	//	console.log(row);
 		var pla=$("#pla").val();
 		if(col=='del'){
 			$.ajax({
@@ -1200,7 +1200,7 @@
 					return false;
 				},
 				success:function(data){
-					console.log(data);
+					//console.log(data);
 					$("#tbl_holiday_doctor").bootstrapTable('refresh',{url : "get_holiday_doctor.php?pla="+pla});
 					bootbox.alert(data);
 				}
@@ -1220,7 +1220,7 @@
 				return false;
 			},
 			success:function(data){
-				console.log(data);
+			//	console.log(data);
 				$("#startdate,#enddate").val('');
 				$("#tbl_holiday_doctor").bootstrapTable('refresh',{url : "get_holiday_doctor.php?pla="+pla});
 				bootbox.alert(data);
@@ -1280,7 +1280,7 @@
 					bootbox.alert("ไม่สามารถส่งข้อความได้");
 					return false;
 				}
-				console.log('sms='+data);
+				//console.log('sms='+data);
 				var cid=$("#cid").val();
 				$.ajax({
 					url: 'update_patients.php',
@@ -1307,7 +1307,7 @@
 
 	// update HN จาก HIS, ตรวจสอบการลงนัดใน HIS, ตรวจสอบการลงรับ Refer ใน HIS, ตรวจสอบการ VISIT บัตรใน HIS
 	function update_appoint(){
-		console.log('update_appoint');
+		//console.log('update_appoint');
 				
 		$.ajax({
 			url: "check_pmk.php",
@@ -1316,7 +1316,7 @@
 				console.log(error);
 			},
 			success:function(data){					
-				console.log(data);
+				//console.log(data);
 			}
 		});	
 		
@@ -1339,7 +1339,7 @@
 					console.log(error);
 				},
 				success:function(data){
-					console.log(data.length);
+					//console.log(data.length);
 					if(data.length==0){
 						moph_refer(referout_no);
 						return false;
@@ -1421,7 +1421,7 @@
 					console.log(request.responseText);
 				},
 				success:function(data){
-					console.log(data);
+					//console.log(data);
 					$("#modal_wait").modal("hide");
 					$("#hn").val(data[0].hn);
 					$("#cid").val(data[0].cid);
@@ -1541,7 +1541,7 @@
 					console.log(err);
 				},
 				success:function(data){
-					console.log(data.data.refer_data);
+					//console.log(data.data.refer_data);
 					//$("#referout_no").val(referout_no);
 					$("#expiredate").val(data.data.refer_data.refer_expire_date);
 					$("#cause_referout_name").val(data.data.refer_data.request_type_name);
@@ -1552,7 +1552,32 @@
 					$("#pr").val('');
 					$("#rr").val('');
 					$("#bp").val('');
-					$("#drugallergy").val(JSON.stringify(data.data.refer_data.medication_allergy_history));
+					// แปลงข้อมูลการแพ้ยาจาก MOPH Refer ให้อ่านได้
+					var drugAllergyText = "";
+					if(data.data.refer_data.medication_allergy_history && Array.isArray(data.data.refer_data.medication_allergy_history)){
+						data.data.refer_data.medication_allergy_history.forEach(function(item, index){
+							if(typeof item === 'object' && item !== null){
+								// ถ้าเป็น object ให้แสดงข้อมูลที่สำคัญ
+								var allergyInfo = [];
+								if(item.drug_name) allergyInfo.push("ยา: " + item.drug_name);
+								if(item.symptom) allergyInfo.push("อาการ: " + item.symptom);
+								if(item.severity) allergyInfo.push("ระดับ: " + item.severity);
+								drugAllergyText += allergyInfo.join(", ");
+							}else if(typeof item === 'string'){
+								drugAllergyText += item;
+							}
+							if(index < data.data.refer_data.medication_allergy_history.length - 1){
+								drugAllergyText += "\n";
+							}
+						});
+					}
+					// ถ้าไม่มีข้อมูลหรือข้อมูลไม่ชัดเจน ให้ดูจาก record_illness_past
+					if(drugAllergyText === "" || drugAllergyText === "[object Object]"){
+						if(data.data.refer_data.record_illness_past){
+							drugAllergyText = data.data.refer_data.record_illness_past;
+						}
+					}
+					$("#drugallergy").val(drugAllergyText);
 					$("#referouttime").val(data.data.refer_data.refer_date);
 					$("#referoutdate").val(data.data.refer_data.refer_date);
 					$("#hcode").val(data.data.refer_data.hospital_origin_name);
@@ -1849,7 +1874,7 @@
 				var date_th = date.format('DD-MM-YYYY');
 				var date=date.format();
 				//var placecode=pla;
-				console.log(pla);
+				//console.log(pla);
 				jQuery.ajax({
 					url: 'get_appoint.php',
 					type: 'GET',	
@@ -1927,7 +1952,7 @@
 
 	// ส่วนของรายงาน
 	function refer_status(report_date){
-		console.log(report_date);
+		//console.log(report_date);
 		$.ajax({
 			url: 'get_report_status.php',
 			type: "POST",
@@ -2455,7 +2480,7 @@
 
 	function hosp_app(report_date){	
 		$.getJSON('get_report_hosp.php', {q: 'app',report_date:report_date}, function(data) {
-			console.log(data.length);
+			//console.log(data.length);
 			Highcharts.chart('hosp_app', {
 				chart: {
 					plotShadow: false,
@@ -2500,7 +2525,7 @@
 
 	function totalNameFormatter(data) {
 		//return data.length
-		console.log(data.length);
+		//console.log(data.length);
 	}
 	
 </script>
