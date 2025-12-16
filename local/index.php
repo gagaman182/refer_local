@@ -1784,8 +1784,10 @@
 						
 					//console.log('text:'+result);
 					//return false;
-					// update status ใน patients หรือใน appoint 
-					if(result=="1"){
+					// update status ใน patients หรือใน appoint
+					// เช็คว่าส่ง LINE สำเร็จ: ถ้า result เป็น "1" หรือมี "sentMessages" (response จาก LINE API)
+					var isSuccess = (result == "1") || (result && result.indexOf('"sentMessages"') > -1);
+					if(isSuccess){
 						//console.log('aaa');
 						$.ajax({
 							url: url,
