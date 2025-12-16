@@ -1548,10 +1548,20 @@
 					$("#doctor_name").val(data.data.refer_data.doctor.firstname_th);
 					$("#cc").val(data.data.refer_data.record_illness_present);
 					$("#diag").val(data.data.refer_data.initial_diagnosis_free_text);
-					$("#t").val('');
-					$("#pr").val('');
-					$("#rr").val('');
-					$("#bp").val('');
+					// โหลด vital signs จาก MOPH Refer
+					if(data.data.refer_data.vital_sign){
+						var vitalSign = data.data.refer_data.vital_sign;
+						// แยก vital signs (format: "140/70 mmHg, HR: 100")
+						$("#bp").val(vitalSign.match(/\d+\/\d+/)?.[0] || '');
+						$("#pr").val(vitalSign.match(/HR:\s*(\d+)/)?.[1] || '');
+						$("#t").val('');
+						$("#rr").val('');
+					}else{
+						$("#t").val('');
+						$("#pr").val('');
+						$("#rr").val('');
+						$("#bp").val('');
+					}
 					// แปลงข้อมูลการแพ้ยาจาก MOPH Refer ให้อ่านได้
 					var drugAllergyText = "";
 					if(data.data.refer_data.medication_allergy_history && Array.isArray(data.data.refer_data.medication_allergy_history)){
@@ -1582,6 +1592,86 @@
 					$("#referoutdate").val(data.data.refer_data.refer_date);
 					$("#hcode").val(data.data.refer_data.hospital_origin_name);
 					$("#refer-file-url").text(data.data.refer_data.refer_file_url);
+
+					// โหลดข้อมูล diagnosis เข้าตาราง tbl_diag
+					var diagData = [];
+					if(data.data.refer_data.initial_diagnosis && Array.isArray(data.data.refer_data.initial_diagnosis)){
+						// ถ้ามีข้อมูล ICD10 แบบ array
+						data.data.refer_data.initial_diagnosis.forEach(function(item){
+							diagData.push({
+								icdcode: item.icd10_code || item.code || '',
+								icdname: item.icd10_name || item.name || item.description || '',
+								type: item.diagtype || item.type || 'Principal'
+							});
+						});
+					}else if(data.data.refer_data.initial_diagnosis && typeof data.data.refer_data.initial_diagnosis === 'string'){
+						// ถ้ามีข้อมูล ICD10 แบบ string (format: "M6268: Muscle strain Other" หรือหลาย diagnosis คั่นด้วย comma)
+						var diagStr = data.data.refer_data.initial_diagnosis;
+
+						// แยก diagnosis ด้วย regex pattern ที่หา CODE: Description
+						// Pattern: หา text ที่ขึ้นต้นด้วย CODE (ตัวอักษรและตัวเลข) ตามด้วย : และ description
+						var diagPattern = /([A-Z0-9]+):\s*([^,]+(?::[^,]*)?)/g;
+						var matches;
+						var foundDiag = false;
+						var diagIndex = 0;
+
+						while ((matches = diagPattern.exec(diagStr)) !== null) {
+							foundDiag = true;
+							diagData.push({
+								icdcode: matches[1].trim(),  // CODE part
+								icdname: matches[2].trim(),  // Description part
+								type: diagIndex === 0 ? 'Principal' : 'Other'  // รายการแรก = Principal, ที่เหลือ = Other
+							});
+							diagIndex++;
+						}
+
+						// ถ้าไม่พบ pattern ให้ใช้วิธีเดิม (แยกด้วย : ครั้งเดียว)
+						if(!foundDiag && diagStr.indexOf(':') > -1){
+							var parts = diagStr.split(':');
+							diagData.push({
+								icdcode: parts[0].trim(),
+								icdname: parts.slice(1).join(':').trim(),
+								type: 'Principal'
+							});
+						}
+					}else if(data.data.refer_data.initial_diagnosis_free_text){
+						// ถ้ามีแค่ free text ให้แสดงแบบ text
+						diagData.push({
+							icdcode: '',
+							icdname: data.data.refer_data.initial_diagnosis_free_text,
+							type: 'Free Text'
+						});
+					}
+					$('#tbl_diag').bootstrapTable('load', diagData);
+
+					// โหลดข้อมูล drug/procedure เข้าตาราง tbl_drug
+					var drugData = [];
+					if(data.data.refer_data.procedure && Array.isArray(data.data.refer_data.procedure)){
+						data.data.refer_data.procedure.forEach(function(item){
+							drugData.push({
+								datedrug: data.data.refer_data.refer_date || '',
+								drugname: item.procedure_name || item.name || '',
+								druguse: item.description || ''
+							});
+						});
+					}
+					if(data.data.refer_data.medication_history){
+						// เพิ่มข้อมูลประวัติการใช้ยา
+						drugData.push({
+							datedrug: data.data.refer_data.refer_date || '',
+							drugname: 'ประวัติการใช้ยา',
+							druguse: data.data.refer_data.medication_history
+						});
+					}
+					if(data.data.refer_data.treatment_provided){
+						// เพิ่มข้อมูลยาที่ให้ไป
+						drugData.push({
+							datedrug: data.data.refer_data.refer_date || '',
+							drugname: 'ยาที่ให้ไป',
+							druguse: data.data.refer_data.treatment_provided
+						});
+					}
+					$('#tbl_drug').bootstrapTable('load', drugData);
 
 					// แสดงปุ่มเปิดใบ Refer
 					if(data.data.refer_data.refer_file_url){

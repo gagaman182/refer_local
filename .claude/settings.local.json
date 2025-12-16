@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(php -r \"\n$_POST[''refer_id''] = ''11397-202512-2716'';\ninclude ''get_moph_refer.php'';\n\")",
+      "Bash(\"c:\\xampp\\php\\php.exe\" -r \"$_POST[''refer_id''] = ''11397-202512-2716''; include ''get_moph_refer.php'';\")",
+      "Bash(\"c:\\xampp\\php\\php.exe\" test_moph_refer.php)",
+      "Bash(\"c:\\xampp\\php\\php.exe\" \"c:\\xampp\\htdocs\\refer_local\\local\\test_moph_refer.php\")",
+      "Bash(python -m json.tool:*)"
     ],
     "deny": [],
     "ask": []
