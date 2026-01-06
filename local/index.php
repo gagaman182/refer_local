@@ -1572,17 +1572,33 @@
 								if(item.drug_name) allergyInfo.push("ยา: " + item.drug_name);
 								if(item.symptom) allergyInfo.push("อาการ: " + item.symptom);
 								if(item.severity) allergyInfo.push("ระดับ: " + item.severity);
-								drugAllergyText += allergyInfo.join(", ");
+
+								// เพิ่มการตรวจสอบ properties อื่นๆ ที่อาจมี
+								if(item.name && !item.drug_name) allergyInfo.push("ยา: " + item.name);
+								if(item.reaction && !item.symptom) allergyInfo.push("อาการ: " + item.reaction);
+
+								// ถ้าไม่มี property ใดๆ เลย ให้พยายาม stringify object
+								if(allergyInfo.length === 0){
+									try{
+										allergyInfo.push(JSON.stringify(item));
+									}catch(e){
+										allergyInfo.push("ข้อมูลการแพ้ยาไม่สามารถแสดงได้");
+									}
+								}
+
+								// เพิ่มข้อความเฉพาะเมื่อมีข้อมูล
+								if(allergyInfo.length > 0){
+									if(drugAllergyText !== "") drugAllergyText += "\n";
+									drugAllergyText += allergyInfo.join(", ");
+								}
 							}else if(typeof item === 'string'){
+								if(drugAllergyText !== "") drugAllergyText += "\n";
 								drugAllergyText += item;
-							}
-							if(index < data.data.refer_data.medication_allergy_history.length - 1){
-								drugAllergyText += "\n";
 							}
 						});
 					}
 					// ถ้าไม่มีข้อมูลหรือข้อมูลไม่ชัดเจน ให้ดูจาก record_illness_past
-					if(drugAllergyText === "" || drugAllergyText === "[object Object]"){
+					if(drugAllergyText === "" || drugAllergyText === "[object Object]" || drugAllergyText.includes("[object Object]")){
 						if(data.data.refer_data.record_illness_past){
 							drugAllergyText = data.data.refer_data.record_illness_past;
 						}
